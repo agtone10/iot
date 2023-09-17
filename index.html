@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitura de Sensor ESP32</title>
+</head>
+
+<body>
+    <h1>Distância do Sensor:</h1>
+    <div id="distanceDisplay">Esperando leitura...</div>
+
+    <!-- Incorporando o Cliente MQTT Paho -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+
+    <script>
+        const broker_url = "wss://broker.hivemq.com:8000/mqtt";  // URL WebSocket do HiveMQ
+        const client_id = "web_client_" + new Date().getTime();
+        const topic = "sensor-distancia";
+
+        let client = new Paho.MQTT.Client(broker_url, client_id);
+
+        client.connect({
+            onSuccess: () => {
+                console.log("Conectado ao HiveMQ!");
+                client.subscribe(topic);
+            },
+            onFailure: (error) => {
+                console.error("Falha ao conectar:", error);
+            }
+        });
+
+        client.onMessageArrived = (message) => {
+            const payload = JSON.parse(message.payloadString);
+            const distancia = payload.distancia;
+            document.getElementById("distanceDisplay").innerText = `${distancia} cm`;
+        };
+    </script>
+</body>
+
+</html>
